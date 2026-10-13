@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1088017918706",
+    "project_id": "communityevents-e3552",
+    "storage_bucket": "communityevents-e3552.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1088017918706:android:472a7ae9c98558a640fe6b",
+        "android_client_info": {
+          "package_name": "com.example.communityeventsapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbQw18z1CyjSTGy-4NLU5a8FawDPTGZ9U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
