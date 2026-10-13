@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.communityeventsapp" />
+                  <option name="mobileSdkAppId" value="1:1088017918706:android:472a7ae9c98558a640fe6b" />
+                  <option name="projectId" value="communityevents-e3552" />
+                  <option name="projectNumber" value="1088017918706" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
