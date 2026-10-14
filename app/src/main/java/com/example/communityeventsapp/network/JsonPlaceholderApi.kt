@@ -1,11 +1,13 @@
 package com.example.communityeventsapp.network
 
+import androidx.annotation.Keep
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
 
+@Keep
 data class PostResponse(
     val userId: Int,
     val id: Int,

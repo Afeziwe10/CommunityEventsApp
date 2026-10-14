@@ -22,6 +22,9 @@ class EventViewModel : ViewModel() {
     private val _addEventState = MutableStateFlow<AddEventUiState>(AddEventUiState.Idle)
     val addEventState: StateFlow<AddEventUiState> = _addEventState.asStateFlow()
 
+    private val _editEventState = MutableStateFlow<EditEventUiState>(EditEventUiState.Idle)
+    val editEventState: StateFlow<EditEventUiState> = _editEventState.asStateFlow()
+
     private val _apiState = MutableStateFlow<ApiUiState>(ApiUiState.Idle)
     val apiState: StateFlow<ApiUiState> = _apiState.asStateFlow()
 
@@ -72,6 +75,39 @@ class EventViewModel : ViewModel() {
         _addEventState.value = AddEventUiState.Idle
     }
 
+    fun updateEvent(
+        eventId: String,
+        title: String,
+        date: String,
+        location: String,
+        description: String,
+        imageUri: Uri?,
+        currentImageUrl: String
+    ) {
+        viewModelScope.launch {
+            _editEventState.value = EditEventUiState.Loading
+            val result = repository.updateEvent(eventId, title, date, location, description, imageUri, currentImageUrl)
+            result.fold(
+                onSuccess = {
+                    _editEventState.value = EditEventUiState.Success
+                },
+                onFailure = { e ->
+                    _editEventState.value = EditEventUiState.Error(e.localizedMessage ?: "Failed to update event")
+                }
+            )
+        }
+    }
+
+    fun resetEditEventState() {
+        _editEventState.value = EditEventUiState.Idle
+    }
+
+    fun deleteEvent(eventId: String) {
+        viewModelScope.launch {
+            repository.deleteEvent(eventId)
+        }
+    }
+
     fun fetchApiPost() {
         viewModelScope.launch {
             _apiState.value = ApiUiState.Loading
@@ -100,6 +136,13 @@ sealed class AddEventUiState {
     object Loading : AddEventUiState()
     object Success : AddEventUiState()
     data class Error(val message: String) : AddEventUiState()
+}
+
+sealed class EditEventUiState {
+    object Idle : EditEventUiState()
+    object Loading : EditEventUiState()
+    object Success : EditEventUiState()
+    data class Error(val message: String) : EditEventUiState()
 }
 
 sealed class ApiUiState {

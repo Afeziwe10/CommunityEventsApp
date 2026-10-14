@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.communityeventsapp.model.Event
 import com.example.communityeventsapp.ui.screens.AddEventScreen
 import com.example.communityeventsapp.ui.screens.ApiDemoScreen
+import com.example.communityeventsapp.ui.screens.EditEventScreen
 import com.example.communityeventsapp.ui.screens.EventDetailScreen
 import com.example.communityeventsapp.ui.screens.EventListScreen
 import com.example.communityeventsapp.ui.screens.SplashScreen
@@ -28,6 +29,7 @@ class MainActivity : ComponentActivity() {
                 val viewModel: EventViewModel = viewModel()
                 val eventsState by viewModel.eventsState.collectAsState()
                 val addEventState by viewModel.addEventState.collectAsState()
+                val editEventState by viewModel.editEventState.collectAsState()
                 val apiState by viewModel.apiState.collectAsState()
 
                 var selectedEvent by remember { mutableStateOf<Event?>(null) }
@@ -52,6 +54,13 @@ class MainActivity : ComponentActivity() {
                             onAddEventClick = {
                                 navController.navigate("add_event")
                             },
+                            onEditEventClick = { event ->
+                                selectedEvent = event
+                                navController.navigate("edit_event")
+                            },
+                            onDeleteEventClick = { event ->
+                                viewModel.deleteEvent(event.id)
+                            },
                             onApiDemoClick = {
                                 navController.navigate("api_demo")
                             },
@@ -64,7 +73,14 @@ class MainActivity : ComponentActivity() {
                         selectedEvent?.let { event ->
                             EventDetailScreen(
                                 event = event,
-                                onBackClick = { navController.popBackStack() }
+                                onBackClick = { navController.popBackStack() },
+                                onEditClick = {
+                                    navController.navigate("edit_event")
+                                },
+                                onDeleteClick = {
+                                    viewModel.deleteEvent(event.id)
+                                    navController.popBackStack()
+                                }
                             )
                         }
                     }
@@ -77,6 +93,19 @@ class MainActivity : ComponentActivity() {
                             onBackClick = { navController.popBackStack() },
                             onResetState = { viewModel.resetAddEventState() }
                         )
+                    }
+                    composable("edit_event") {
+                        selectedEvent?.let { event ->
+                            EditEventScreen(
+                                event = event,
+                                editEventState = editEventState,
+                                onUpdateEvent = { id, title, date, location, description, uri, currentImgUrl ->
+                                    viewModel.updateEvent(id, title, date, location, description, uri, currentImgUrl)
+                                },
+                                onBackClick = { navController.popBackStack() },
+                                onResetState = { viewModel.resetEditEventState() }
+                            )
+                        }
                     }
                     composable("api_demo") {
                         ApiDemoScreen(
