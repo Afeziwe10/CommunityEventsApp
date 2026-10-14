@@ -7,8 +7,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,9 +26,36 @@ fun EventListScreen(
     uiState: EventsUiState,
     onEventClick: (Event) -> Unit,
     onAddEventClick: () -> Unit,
+    onEditEventClick: (Event) -> Unit,
+    onDeleteEventClick: (Event) -> Unit,
     onApiDemoClick: () -> Unit,
     onRetry: () -> Unit
 ) {
+    var eventToDelete by remember { mutableStateOf<Event?>(null) }
+
+    eventToDelete?.let { event ->
+        AlertDialog(
+            onDismissRequest = { eventToDelete = null },
+            title = { Text("Delete Event") },
+            text = { Text("Are you sure you want to delete \"${event.title}\"? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDeleteEventClick(event)
+                        eventToDelete = null
+                    }
+                ) {
+                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { eventToDelete = null }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -88,7 +117,12 @@ fun EventListScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(uiState.events) { event ->
-                            EventItemCard(event = event, onClick = { onEventClick(event) })
+                            EventItemCard(
+                                event = event,
+                                onClick = { onEventClick(event) },
+                                onEditClick = { onEditEventClick(event) },
+                                onDeleteClick = { eventToDelete = event }
+                            )
                         }
                     }
                 }
@@ -117,7 +151,12 @@ fun EventListScreen(
 }
 
 @Composable
-fun EventItemCard(event: Event, onClick: () -> Unit) {
+fun EventItemCard(
+    event: Event,
+    onClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -178,6 +217,26 @@ fun EventItemCard(event: Event, onClick: () -> Unit) {
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 2
+                    )
+                }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = onEditClick) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit Event",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Event",
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
             }

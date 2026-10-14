@@ -1,4 +1,4 @@
-package za.co.communityevents.ui.screens
+package com.example.communityeventsapp.ui.screens
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -14,20 +14,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import za.co.communityevents.viewmodel.AddEventUiState
+import com.example.communityeventsapp.model.Event
+import com.example.communityeventsapp.viewmodel.EditEventUiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddEventScreen(
-    addEventState: AddEventUiState,
-    onSaveEvent: (String, String, String, String, Uri?) -> Unit,
+fun EditEventScreen(
+    event: Event,
+    editEventState: EditEventUiState,
+    onUpdateEvent: (String, String, String, String, String, Uri?, String) -> Unit,
     onBackClick: () -> Unit,
     onResetState: () -> Unit
 ) {
-    var title by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
-    var location by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    var title by remember(event) { mutableStateOf(event.title) }
+    var date by remember(event) { mutableStateOf(event.date) }
+    var location by remember(event) { mutableStateOf(event.location) }
+    var description by remember(event) { mutableStateOf(event.description) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -37,8 +39,8 @@ fun AddEventScreen(
         selectedImageUri = uri
     }
 
-    LaunchedEffect(addEventState) {
-        if (addEventState is AddEventUiState.Success) {
+    LaunchedEffect(editEventState) {
+        if (editEventState is EditEventUiState.Success) {
             onBackClick()
             onResetState()
         }
@@ -47,7 +49,7 @@ fun AddEventScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add Community Event") },
+                title = { Text("Edit Community Event") },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -108,13 +110,22 @@ fun AddEventScreen(
 
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Button(onClick = { imagePickerLauncher.launch("image/*") }) {
-                        Text(if (selectedImageUri == null) "Select Event Image (Optional)" else "Change Image")
+                        Text(if (selectedImageUri == null && event.imageUrl.isBlank()) "Select Event Image (Optional)" else "Change Image")
                     }
-                    selectedImageUri?.let { uri ->
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    if (selectedImageUri != null) {
                         AsyncImage(
-                            model = uri,
-                            contentDescription = "Selected Image Preview",
+                            model = selectedImageUri,
+                            contentDescription = "New Selected Image Preview",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else if (event.imageUrl.isNotBlank()) {
+                        AsyncImage(
+                            model = event.imageUrl,
+                            contentDescription = "Current Image Preview",
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(160.dp),
@@ -131,9 +142,9 @@ fun AddEventScreen(
                     )
                 }
 
-                if (addEventState is AddEventUiState.Error) {
+                if (editEventState is EditEventUiState.Error) {
                     Text(
-                        text = "Save Error: ${addEventState.message}",
+                        text = "Update Error: ${editEventState.message}",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -153,7 +164,6 @@ fun AddEventScreen(
                             return@Button
                         }
 
-                        // Validate YYYY-MM-DD date format
                         val dateRegex = Regex("^\\d{4}-\\d{2}-\\d{2}$")
                         if (!dateRegex.matches(trimmedDate)) {
                             errorMessage = "Date must be in exact YYYY-MM-DD format (e.g. 2026-11-25)."
@@ -161,18 +171,26 @@ fun AddEventScreen(
                         }
 
                         errorMessage = null
-                        onSaveEvent(trimmedTitle, trimmedDate, trimmedLocation, trimmedDescription, selectedImageUri)
+                        onUpdateEvent(
+                            event.id,
+                            trimmedTitle,
+                            trimmedDate,
+                            trimmedLocation,
+                            trimmedDescription,
+                            selectedImageUri,
+                            event.imageUrl
+                        )
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = addEventState !is AddEventUiState.Loading
+                    enabled = editEventState !is EditEventUiState.Loading
                 ) {
-                    if (addEventState is AddEventUiState.Loading) {
+                    if (editEventState is EditEventUiState.Loading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Save Event")
+                        Text("Update Event")
                     }
                 }
             }
