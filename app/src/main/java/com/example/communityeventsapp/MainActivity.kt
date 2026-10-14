@@ -14,6 +14,7 @@ import com.example.communityeventsapp.ui.screens.AddEventScreen
 import com.example.communityeventsapp.ui.screens.ApiDemoScreen
 import com.example.communityeventsapp.ui.screens.EventDetailScreen
 import com.example.communityeventsapp.ui.screens.EventListScreen
+import com.example.communityeventsapp.ui.screens.SplashScreen
 import com.example.communityeventsapp.ui.theme.CommunityEventsTheme
 import com.example.communityeventsapp.viewmodel.EventViewModel
 
@@ -31,7 +32,16 @@ class MainActivity : ComponentActivity() {
 
                 var selectedEvent by remember { mutableStateOf<Event?>(null) }
 
-                NavHost(navController = navController, startDestination = "events_list") {
+                NavHost(navController = navController, startDestination = "splash") {
+                    composable("splash") {
+                        SplashScreen(
+                            onSplashFinished = {
+                                navController.navigate("events_list") {
+                                    popUpTo("splash") { inclusive = true }
+                                }
+                            }
+                        )
+                    }
                     composable("events_list") {
                         EventListScreen(
                             uiState = eventsState,
